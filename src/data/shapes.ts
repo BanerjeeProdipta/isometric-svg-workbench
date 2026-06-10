@@ -32,12 +32,14 @@ export const SHAPES_DATA: ShapeDefinition[] = [
     ]
   },
   {
-    id: 'rectangular-bar',
-    name: 'Rectangular Prism',
-    description: 'A long horizontal bar running along the Y-axis.',
-    boxes: [
-      { x: -0.25, y: -1.0, z: -0.25, w: 0.5, d: 2.0, h: 0.5 }
-    ]
+    id: 'ball',
+    name: 'Ball',
+    description: 'A spherical form drawn as two bended great-circle rings.',
+    boxes: [],
+    ellipses: [
+      { cx: 0, cy: 0, cz: 0.0, rx: 0.82, ry: 0.82, plane: 'xz', hasTicks: false },
+      { cx: 0, cy: 0, cz: 0.0, rx: 0.82, ry: 0.82, plane: 'yz', hasTicks: false },
+    ],
   },
   {
     id: 'hollow-cube',
@@ -205,18 +207,20 @@ export const SHAPES_DATA: ShapeDefinition[] = [
     ]
   },
   {
-    id: 'static-shape-5',
-    name: 'Sheared Channel Splice',
-    description: 'An asymmetrical vertical block structure styled with custom wireframe line segments.',
-    boxes: [
-      { x: -0.5, y: -0.5, z: -0.6, w: 0.3, d: 1.0, h: 1.2 },
-      { x: 0.2, y: -0.3, z: -0.6, w: 0.3, d: 0.6, h: 0.6 },
-      { x: -0.2, y: -0.2, z: -0.3, w: 0.4, d: 0.4, h: 0.3 }
-    ],
+    id: 'pyramid',
+    name: 'Pyramid',
+    description: 'A sparse wireframe pyramid drawn with only the essential edges.',
+    boxes: [],
     lines: [
-      { p1: { x: -0.5, y: -0.5, z: 0.6 }, p2: { x: 0.5, y: 0.3, z: 0.0 } },
-      { p1: { x: -0.5, y: 0.5, z: 0.6 }, p2: { x: 0.5, y: 0.3, z: 0.0 } }
-    ]
+      { p1: { x: -0.55, y: -0.55, z: -0.55 }, p2: { x: 0.55, y: -0.55, z: -0.55 } },
+      { p1: { x: 0.55, y: -0.55, z: -0.55 }, p2: { x: 0.55, y: 0.55, z: -0.55 } },
+      { p1: { x: 0.55, y: 0.55, z: -0.55 }, p2: { x: -0.55, y: 0.55, z: -0.55 } },
+      { p1: { x: -0.55, y: 0.55, z: -0.55 }, p2: { x: -0.55, y: -0.55, z: -0.55 } },
+      { p1: { x: -0.55, y: -0.55, z: -0.55 }, p2: { x: 0, y: 0, z: 0.35 } },
+      { p1: { x: 0.55, y: -0.55, z: -0.55 }, p2: { x: 0, y: 0, z: 0.35 } },
+      { p1: { x: 0.55, y: 0.55, z: -0.55 }, p2: { x: 0, y: 0, z: 0.35 } },
+      { p1: { x: -0.55, y: 0.55, z: -0.55 }, p2: { x: 0, y: 0, z: 0.35 } },
+    ],
   },
   {
     id: 'static-shape-6',

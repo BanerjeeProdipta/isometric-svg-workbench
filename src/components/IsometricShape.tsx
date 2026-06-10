@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
 import { ShapeDefinition, StyleOptions } from '../types';
-import { 
-  getBoxFaces, 
-  projectEllipse, 
-  projectLine, 
-  ProjectedFace, 
-  ProjectedEllipse, 
+import {
+  getBoxFaces,
+  projectEllipse,
+  projectLine,
+  ProjectedFace,
+  ProjectedEllipse,
   ProjectedLine,
   getPathBoundingBox
 } from '../utils/geometry';
+import { hexToRgba } from '../utils/color';
 
 interface IsometricShapeProps {
   shape: ShapeDefinition;
@@ -51,7 +52,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
       maxX: maxX === -Infinity ? 100 : maxX,
       maxY: maxY === -Infinity ? 100 : maxY,
     };
-  }, [shape, isStaticPath]);
+  }, [shape.id, isStaticPath, shapeAsAny.fillPaths, shapeAsAny.strokePaths]);
 
   const transform = useMemo(() => {
     if (!combinedBBox) return '';
@@ -124,81 +125,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
       }
       return a.depth - b.depth;
     });
-  }, [shape, options, centerX, centerY]);
-
-  // Find the minimum Z coordinate across all boxes, ellipses, and lines in the shape
-  const minZ = useMemo(() => {
-    let lowest = -0.5; // Default fallback
-    let first = true;
-
-    if (shape.boxes && shape.boxes.length > 0) {
-      shape.boxes.forEach(box => {
-        if (first) {
-          lowest = box.z;
-          first = false;
-        } else {
-          lowest = Math.min(lowest, box.z);
-        }
-      });
-    }
-
-    if (shape.ellipses && shape.ellipses.length > 0) {
-      shape.ellipses.forEach(ell => {
-        const r = Math.max(ell.rx, ell.ry);
-        const ellMinZ = ell.plane === 'xy' ? ell.cz : (ell.cz - r);
-        if (first) {
-          lowest = ellMinZ;
-          first = false;
-        } else {
-          lowest = Math.min(lowest, ellMinZ);
-        }
-      });
-    }
-
-    if (shape.lines && shape.lines.length > 0) {
-      shape.lines.forEach(line => {
-        const lineMinZ = Math.min(line.p1.z, line.p2.z);
-        if (first) {
-          lowest = lineMinZ;
-          first = false;
-        } else {
-          lowest = Math.min(lowest, lineMinZ);
-        }
-      });
-    }
-
-    return lowest;
-  }, [shape]);
-
-  // Generate SVG grid lines if enabled
-  const gridLines = useMemo(() => {
-    if (!options.showGrid) return null;
-    const linesArr = [];
-    const size = options.gridSize; // Number of lines in each direction
-    const step = 0.4;             // Spacing in 3D coordinate units
-
-    // Draw XY-plane grid lines centered at 0
-    for (let i = -size; i <= size; i++) {
-      // Line parallel to Y axis (ranging over Y, constant X)
-      const lineX = projectLine(
-        { p1: { x: i * step, y: -size * step, z: minZ }, p2: { x: i * step, y: size * step, z: minZ } },
-        options,
-        centerX,
-        centerY
-      );
-      linesArr.push(lineX);
-
-      // Line parallel to X axis (ranging over X, constant Y)
-      const lineY = projectLine(
-        { p1: { x: -size * step, y: i * step, z: minZ }, p2: { x: size * step, y: i * step, z: minZ } },
-        options,
-        centerX,
-        centerY
-      );
-      linesArr.push(lineY);
-    }
-    return linesArr;
-  }, [options.showGrid, options.gridSize, options.rotationX, options.rotationY, options.rotationZ, options.scale, centerX, centerY, minZ]);
+  }, [shape, options.rotationX, options.rotationY, options.rotationZ, options.scale, centerX, centerY]);
 
   return (
     <svg
@@ -207,18 +134,15 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
       height="100%"
       viewBox={`0 0 ${width} ${height}`}
       className="select-none"
-      style={{ background: options.backgroundColor, transition: 'background 0.3s ease' }}
+      style={{
+        background: hexToRgba(
+          options.backgroundColor,
+          options.backgroundOpacity,
+        ),
+        transition: 'background 0.3s ease',
+      }}
     >
-      {/* 1. Grid Background Overlay */}
-      {options.showGrid && gridLines && (
-        <g stroke={options.gridColor} strokeWidth="0.5" strokeOpacity="0.4" strokeDasharray="2,2">
-          {gridLines.map((gl, idx) => (
-            <line key={`grid-${idx}`} x1={gl.x1} y1={gl.y1} x2={gl.x2} y2={gl.y2} />
-          ))}
-        </g>
-      )}
-
-      {/* 2. Drawing 3D Entities */}
+      {/* Drawing 3D Entities */}
       {isStaticPath ? (
         <g transform={transform}>
           {shapeAsAny.fillPaths && shapeAsAny.fillPaths.map((pathStr: string, idx: number) => (
@@ -226,7 +150,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
               key={`static-fill-${idx}`}
               d={pathStr}
               fill={options.strokeColor}
-              fillOpacity={options.fillOpacity > 0 ? options.fillOpacity : 0.08}
+              fillOpacity={options.modelFillOpacity * options.fillOpacity}
               stroke="none"
               strokeLinejoin="round"
             />
@@ -238,6 +162,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
               fill="none"
               stroke={options.strokeColor}
               strokeWidth={options.strokeWidth}
+              strokeOpacity={options.strokeOpacity}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -277,9 +202,10 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
                   <polygon
                     points={ptsStr}
                     fill={baseFill}
-                    fillOpacity={options.fillOpacity}
+                    fillOpacity={options.modelFillOpacity * options.fillOpacity}
                     stroke={options.strokeColor}
                     strokeWidth={options.strokeWidth}
+                    strokeOpacity={options.strokeOpacity}
                     strokeLinejoin="round"
                   />
                   
@@ -305,6 +231,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
                     fill="none"
                     stroke={options.strokeColor}
                     strokeWidth={options.strokeWidth}
+                    strokeOpacity={options.strokeOpacity}
                     strokeLinecap="round"
                   />
                   {ellipse.ticks.map((tick, tIdx) => (
@@ -316,6 +243,7 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
                       y2={tick.y2}
                       stroke={options.strokeColor}
                       strokeWidth={options.strokeWidth}
+                      strokeOpacity={options.strokeOpacity}
                       strokeLinecap="round"
                     />
                   ))}
@@ -330,12 +258,13 @@ export const IsometricShape: React.FC<IsometricShapeProps> = ({
                   key={`el-${index}-line`}
                   x1={line.x1}
                   y1={line.y1}
-                  x2={line.x2}
-                  y2={line.y2}
-                  stroke={el.color || options.strokeColor}
-                  strokeWidth={options.strokeWidth}
-                  strokeLinecap="round"
-                />
+                x2={line.x2}
+                y2={line.y2}
+                stroke={el.color || options.strokeColor}
+                strokeWidth={options.strokeWidth}
+                strokeOpacity={options.strokeOpacity}
+                strokeLinecap="round"
+              />
               );
             }
 

@@ -57,10 +57,10 @@ export interface StyleOptions {
   rotationX: number;        // in degrees (pitch)
   rotationY: number;        // in degrees (yaw)
   rotationZ: number;        // in degrees (roll)
-  showGrid: boolean;
-  gridSize: number;
-  gridColor: string;
   backgroundColor: string;
+  backgroundOpacity: number;
+  modelFillOpacity: number;
+  strokeOpacity: number;
 }
 
 export type PresetTheme = 'blueprint' | 'monochrome' | 'emerald' | 'sunset' | 'cyberpunk' | 'warmPalette';

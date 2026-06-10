@@ -92,7 +92,7 @@ export default Isometric_${shape.id.replace(/[^a-zA-Z0-9]/g, '_')};`;
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" /> Copied!
+                <Check className="w-4 h-4 text-[#ff9ecf]" /> Copied!
               </>
             ) : (
               <>
@@ -109,7 +109,7 @@ export default Isometric_${shape.id.replace(/[^a-zA-Z0-9]/g, '_')};`;
           >
             {copiedJsx ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" /> Copied React!
+                <Check className="w-4 h-4 text-[#ff9ecf]" /> Copied React!
               </>
             ) : (
               <>
