@@ -2,5 +2,5 @@
   "name": "Isometric SVG Workbench",
   "description": "An interactive workbench to customize, preview, and export high-quality isometric 3D geometric SVG shapes with precise scaling, styling, and code generation.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }
